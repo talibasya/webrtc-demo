@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WebRTC Example</title>
+  <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+
+  <main>
+
+    <div class="topBar" id="title">
+      WebRTC Example
+    </div>
+
+    <div class="main" id="loading">
+      <span id="loadingText">Loading...</span>
+    </div>
+
+    <div class="main" id="error" style="display: none">
+      <h1>Error</h1>
+      <span id="errorText">Loading...</span>
+    </div>
+
+    <form class="main" id="roomInputContainer" style="display: none">
+      <input id="roomName" type="text" placeholder="Enter room name">
+      <input id="joinButton" type="submit" value="JOIN">
+    </form>
+
+    <div class="main" id="videoContainer" style="display: none">
+      <video id="video"></video>
+    </div>
+
+    <div class="bottomBar">
+      <span id="status">
+      Please wait.
+      </span>
+    </div>
+
+  </main>
+
+  <div class="retroOverlay"></div>
+
+  <script src="index.compiled.js"></script>
+
+</body>
+</html>

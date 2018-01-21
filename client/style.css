@@ -1,0 +1,166 @@
+@keyframes blink {
+  0%, 49% {
+    color: black;
+  }
+  50%, 100% {
+
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  color: #6d6d6d;
+  font-family: 'VT323', monospace;
+  font-size: 32px;
+}
+main {
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  filter: sepia(1) contrast(4) hue-rotate(65deg);
+}
+.topBar {
+  width: 100%;
+  height: 1.5em;
+  flex-grow: 0;
+  flex-shrink: 0;
+  line-height: 1.5em;
+  border-bottom: 2px solid #6d6d6d;
+  text-align: center;
+}
+.bottomBar {
+  width: 100%;
+  height: 2.3em;
+  flex-grow: 0;
+  flex-shrink: 0;
+  border-top: 2px solid #6d6d6d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bottomBar {
+  line-height: 30px;
+
+}
+.main {
+  width: 100%;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+#roomInputContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+}
+input {
+  border: 2px solid #6d6d6d;
+  background: none;
+  height: 30px;
+  font-family: 'VT323', monospace;
+  color: #6d6d6d;
+  font-size: 23px;
+  line-height: 20px;
+  padding: 4px;
+  box-sizing: border-box;
+  margin: 2px;
+}
+input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+  color: #6d6d6d;
+  font-family: 'VT323', monospace;
+  font-size: 23px;
+  line-height: 30px;
+}
+input::-moz-placeholder { /* Firefox 19+ */
+  color: #6d6d6d;
+  font-family: 'VT323', monospace;
+  font-size: 23px;
+  line-height: 30px;
+}
+input:-ms-input-placeholder { /* IE 10+ */
+  color: #6d6d6d;
+  font-family: 'VT323', monospace;
+  font-size: 23px;
+  line-height: 30px;
+
+}
+input:-moz-placeholder { /* Firefox 18- */
+  color: #6d6d6d;
+  font-family: 'VT323', monospace;
+  font-size: 23px;
+  line-height: 30px;
+}
+*:focus {
+  outline: none;
+}
+#roomName {
+  width: 180px;
+}
+#joinButton {
+  width: 60px;
+  padding: 4px;
+}
+#joinButton:hover {
+  border-color: black;
+  color: black;
+  background: #6d6d6d;
+}
+
+#loading {
+  animation: blink 0.5s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: red;
+}
+#error h1 {
+  color: red;
+  animation: blink 0.333s infinite;
+}
+
+#videoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.retroOverlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  background-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%,rgba(0,0,0,0) 50%,rgba(0,0,0,1) 100%);
+  background-size: 2px 2px;
+  pointer-events: none;
+}
+
+video {
+  max-width: 95%;
+  max-height: 95%;
+  border: 2px solid #6d6d6d;
+}
