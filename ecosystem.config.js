@@ -37,7 +37,7 @@ module.exports = {
       user : 'root',
       host : 'comm-xaos.default.svc.cluster.local',
       ref  : 'origin/master',
-      repo : 'https://bitbucket.org/MLaszczewski/webrtc-demo',
+      repo : 'git@bitbucket.org:MLaszczewski/webrtc-demo.git',
       path : '/root',
       'post-deploy' : './compile.sh && pm2 reload ecosystem.config.js --env production',
       env  : {
