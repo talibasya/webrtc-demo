@@ -195,7 +195,15 @@ view.roomInputContainer.addEventListener("submit", (ev) => {
 })
 
 view.showLoading("Waiting for video input.", "Please connect camera.")
-navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+
+let userMediaSettings = { audio: true, video: true }
+
+let userMediaPromise
+if(navigator.mediaDevices.getUserMedia) userMediaPromise = navigator.mediaDevices.getUserMedia(userMediaSettings)
+else if(navigator.getUserMedia) userMediaPromise = new Promise(function(resolve, reject) {
+  navigator.getUserMedia(userMediaSettings, resolve, reject)
+})
+userMediaPromise
   .then(function(stream) {
     localStream = stream
     //view.showVideo(URL.createObjectURL(stream))
