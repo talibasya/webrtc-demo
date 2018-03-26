@@ -16,7 +16,7 @@ body {
   width: 100%;
   height: 100%;
   background: black;
-  color: #6d6d6d;
+  color: #00e91b;
   font-family: 'VT323', monospace;
   font-size: 32px;
 }
@@ -33,7 +33,6 @@ main {
   align-items: center;
   justify-content: center;
   text-transform: uppercase;
-  filter: sepia(1) contrast(4) hue-rotate(65deg);
 }
 .topBar {
   width: 100%;
@@ -41,7 +40,7 @@ main {
   flex-grow: 0;
   flex-shrink: 0;
   line-height: 1.5em;
-  border-bottom: 2px solid #6d6d6d;
+  border-bottom: 2px solid #00e91b;
   text-align: center;
 }
 .bottomBar {
@@ -49,7 +48,7 @@ main {
   height: 2.3em;
   flex-grow: 0;
   flex-shrink: 0;
-  border-top: 2px solid #6d6d6d;
+  border-top: 2px solid #00e91b;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -70,11 +69,11 @@ main {
   flex-direction: row;
 }
 input {
-  border: 2px solid #6d6d6d;
+  border: 2px solid #00e91b;
   background: none;
   height: 30px;
   font-family: 'VT323', monospace;
-  color: #6d6d6d;
+  color: #00e91b;
   font-size: 23px;
   line-height: 20px;
   padding: 4px;
@@ -82,26 +81,26 @@ input {
   margin: 2px;
 }
 input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
-  color: #6d6d6d;
+  color: #00e91b;
   font-family: 'VT323', monospace;
   font-size: 23px;
   line-height: 30px;
 }
 input::-moz-placeholder { /* Firefox 19+ */
-  color: #6d6d6d;
+  color: #00e91b;
   font-family: 'VT323', monospace;
   font-size: 23px;
   line-height: 30px;
 }
 input:-ms-input-placeholder { /* IE 10+ */
-  color: #6d6d6d;
+  color: #00e91b;
   font-family: 'VT323', monospace;
   font-size: 23px;
   line-height: 30px;
 
 }
 input:-moz-placeholder { /* Firefox 18- */
-  color: #6d6d6d;
+  color: #00e91b;
   font-family: 'VT323', monospace;
   font-size: 23px;
   line-height: 30px;
@@ -119,7 +118,7 @@ input:-moz-placeholder { /* Firefox 18- */
 #joinButton:hover {
   border-color: black;
   color: black;
-  background: #6d6d6d;
+  background: #00e91b;
 }
 
 #loading {
@@ -147,20 +146,8 @@ input:-moz-placeholder { /* Firefox 18- */
   justify-content: center;
 }
 
-.retroOverlay {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
-  background-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%,rgba(0,0,0,0) 50%,rgba(0,0,0,1) 100%);
-  background-size: 2px 2px;
-  pointer-events: none;
-}
-
 video {
   max-width: 95%;
   max-height: 95%;
-  border: 2px solid #6d6d6d;
+  border: 2px solid #00e91b;
 }
