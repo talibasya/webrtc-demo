@@ -202,7 +202,7 @@ let userMediaPromise
 if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) userMediaPromise = navigator.mediaDevices.getUserMedia(userMediaSettings)
 else if(navigator.getUserMedia) userMediaPromise = new Promise(function(resolve, reject) {
   navigator.getUserMedia(userMediaSettings, resolve, reject)
-}) else throw new Error("getUserMedia not available")
+}); else throw new Error("getUserMedia not available")
 userMediaPromise
   .then(function(stream) {
     localStream = stream
