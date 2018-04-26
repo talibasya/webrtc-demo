@@ -54,9 +54,14 @@ let view = {
   videoContainer: document.getElementById('videoContainer'),
   video: document.getElementById('video'),
   status: document.getElementById('status'),
+  inRoom: document.getElementById('inRoom'),
+  inRoomText: document.getElementById('inRoomText'),
+  exitRoom: document.getElementById('exitRoom'),
+  exitRoom2: document.getElementById('exitRoom2'),
 
   /// Function that hide all main content elements
   hideAll() {
+    this.inRoom.style.display = 'none'
     this.loading.style.display = 'none'
     this.error.style.display = 'none'
     this.roomInputContainer.style.display = 'none'
@@ -69,6 +74,17 @@ let view = {
     // clear style.display so element will have it's css based display property
     this.loading.style.display = ''
     this.loadingText.innerText = text
+    if(status) { // If status parameter exists set status too
+      this.status.innerText = status
+    }
+  },
+
+  /// Shows loading screen in room
+  showInRoom(text, status) {
+    this.hideAll() // Hide other/all screens
+    // clear style.display so element will have it's css based display property
+    this.inRoom.style.display = ''
+    this.inRoomText.innerText = text
     if(status) { // If status parameter exists set status too
       this.status.innerText = status
     }
@@ -150,6 +166,7 @@ function enterRoom(roomNamep) {
   view.showLoading("Connecting to room "+roomName, "Please wait.")
   dao.observable(['room', 'amICalling', roomName]).observe({
     set(callingp) {
+      view.showInRoom("Waiting for other user", "Please wait.")
       if(calling == undefined) {
         calling = callingp
       } else {
@@ -181,10 +198,22 @@ function enterRoom(roomNamep) {
   dao.observable(['room', 'otherUserSdp', roomName]).observe({
     set(sdp) { // Reaction to sdp changes
       if(sdp) {
+        view.showInRoom("Connecting to other user", "Please wait.")
         peerConnection.setRemoteDescription(new RTCSessionDescription(sdp))
         if(!calling) sendAnswer()
       }
     }
+  })
+}
+
+function exitRoom() {
+  view.showLoading("Exiting room "+roomName, "Please wait.")
+  if(peerConnection) {
+    peerConnection.close()
+    peerConnection = null
+  }
+  dao.request(["room", "exitRoom"], roomName).then(ok => {
+    view.showRoomInput()
   })
 }
 
@@ -193,6 +222,9 @@ view.roomInputContainer.addEventListener("submit", (ev) => {
   ev.preventDefault();
   enterRoom(view.roomName.value)
 })
+
+view.exitRoom.addEventListener("click", (ev) => exitRoom())
+view.exitRoom2.addEventListener("click", (ev) => exitRoom())
 
 view.showLoading("Waiting for video input.", "Please connect camera.")
 

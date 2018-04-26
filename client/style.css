@@ -144,7 +144,20 @@ input:-moz-placeholder { /* Firefox 18- */
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
 }
+
+#inRoom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+#inRoomText {
+  animation: blink 0.5s infinite;
+}
+
+
 
 video {
   max-width: 95%;

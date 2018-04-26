@@ -3,7 +3,6 @@ const express = require('express');
 const http = require('http')
 const sockjs = require('sockjs')
 
-
 let rooms = new Map()
 
 class User {
@@ -132,6 +131,12 @@ function daoFactory(sessionId, connection) {
           },
           setSdp(roomName, offer) {
             getOrCreateRoom(roomName).getOrAddUser(sessionId, ip).setSdp(offer)
+            return Promise.resolve('ok')
+          },
+          exitRoom(roomName) {
+            let room = rooms.get(roomName)
+            if(!room) throw new Error("room "+roomName+" not found")
+            room.deleteUser(sessionId)
             return Promise.resolve('ok')
           }
         }
