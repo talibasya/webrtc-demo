@@ -1,6 +1,7 @@
 /// IMPORT reactive-dao for disconnect-resistant communication protocol
 import ReactiveDao from "reactive-dao"
 import ReactiveSockJS from "reactive-dao-sockjs"
+import rdws from "reactive-dao-websocket"
 
 /// Globally Unique IDentifier generator - for client-side generated session numbers
 function guid() {
@@ -16,11 +17,19 @@ let sessionId = guid()
 /// Create data access object
 let dao = new ReactiveDao(sessionId, {
   /// data access object remote endpoint url
-  remoteUrl: document.location.protocol + '//' + document.location.host + "/sockjs",
+
+  /*remoteUrl: document.location.protocol + '//' + document.location.host + "/sockjs",
   protocols: { // Load reactive-dao protocol transports
     'sockjs': ReactiveSockJS // SockJS transport
+  },*/
+
+  remoteUrl: (document.location.protocol == "https:" ? "wss:" : "ws:")  + '//' + document.location.host + "/ws",
+  protocols: {
+    ws: rdws.client
   },
+
   room: { // Room info service object
+    proto: "ws",
     type: "remote", // Remote object - synchronized with server DAO
     generator: ReactiveDao.ObservableList // Observable list is more universal than observable-value
   }
@@ -146,13 +155,15 @@ function resetWebRTC() {
   console.log("INIT WEBRTC")
   peerConnection = new (RTCPeerConnection || webkitRTCPeerConnection || mozRTCPeerConnection)(peerConnectionConfig)
   peerConnection.onicecandidate = function (evt) {
-    if(evt.candidate) dao.request(['room', 'addIce'], roomName, evt.candidate)
+    dao.request(['room', 'addIce'], roomName, evt.candidate)
   }
   peerConnection.onaddstream = function (evt) {
     view.showVideo(URL.createObjectURL(evt.stream))
   }
   peerConnection.addStream(localStream)
-  for(let candidate of remoteIce) peerConnection.addIceCandidate(candidate)
+  for(let candidate of remoteIce) {
+    if(candidate) peerConnection.addIceCandidate(candidate)
+  }
   if(remoteSdp) {
     peerConnection.setRemoteDescription(remoteSdp)
     if (!calling) sendAnswer()
@@ -160,53 +171,65 @@ function resetWebRTC() {
   if (calling) sendOffer()
 }
 
+const sdpObserver = {
+  set(sdp) { // Reaction to sdp changes
+    if(sdp) {
+      view.showInRoom("Connecting to other user", "Please wait.")
+      peerConnection.setRemoteDescription(new RTCSessionDescription(sdp))
+      if(!calling) sendAnswer()
+    }
+  }
+}
+
+const iceObserver = {
+  set(initialIce) { // Reaction to ice reset
+    for (let ice of initialIce) if(ice) peerConnection.addIceCandidate(new RTCIceCandidate(ice))
+  },
+  push(candidate) {
+    remoteIce.push(candidate)
+    if (candidate) peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+  }
+}
+
+const amICallingObserver = {
+  set(callingp) {
+    view.showInRoom("Waiting for other user", "Please wait.")
+    if(calling == undefined) {
+      calling = callingp
+    } else {
+      if(calling != callingp) {
+        resetWebRTC()
+      }
+    }
+  }
+}
+
+const myIpObserver = {
+  set(ip) { // Reaction to ip changes
+    if(myIp !== ip) {
+      myIp = ip
+      resetWebRTC()
+    } else if(peerConnection) { // Reaction to reconnect
+      dao.request(["room", "setSdp"], roomName, peerConnection.currentLocalDescription.toJSON())
+    }
+  }
+}
+
 /// Enter room action
 function enterRoom(roomNamep) {
   roomName = roomNamep
   view.showLoading("Connecting to room "+roomName, "Please wait.")
-  dao.observable(['room', 'amICalling', roomName]).observe({
-    set(callingp) {
-      view.showInRoom("Waiting for other user", "Please wait.")
-      if(calling == undefined) {
-        calling = callingp
-      } else {
-        if(calling != callingp) {
-          resetWebRTC()
-        }
-      }
-    }
-  })
-  dao.observable(['room', 'myIp', roomName]).observe({
-    set(ip) { // Reaction to ip changes
-      if(myIp !== ip) {
-        myIp = ip
-        resetWebRTC()
-      } else { // Reaction to reconnect
-        dao.request(["room", "setSdp"], roomName, peerConnection.currentLocalDescription.toJSON())
-      }
-    }
-  })
-  dao.observable(['room', 'otherUserIce', roomName]).observe({
-    set(initialIce) { // Reaction to ice reset
-      for(let ice of initialIce) peerConnection.addIceCandidate(new RTCIceCandidate(ice))
-    },
-    push(candidate) {
-      remoteIce.push(candidate)
-      peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
-    }
-  })
-  dao.observable(['room', 'otherUserSdp', roomName]).observe({
-    set(sdp) { // Reaction to sdp changes
-      if(sdp) {
-        view.showInRoom("Connecting to other user", "Please wait.")
-        peerConnection.setRemoteDescription(new RTCSessionDescription(sdp))
-        if(!calling) sendAnswer()
-      }
-    }
-  })
+  dao.observable(['room', 'amICalling', roomName]).observe(amICallingObserver)
+  dao.observable(['room', 'myIp', roomName]).observe(myIpObserver)
+  dao.observable(['room', 'otherUserIce', roomName]).observe(iceObserver)
+  dao.observable(['room', 'otherUserSdp', roomName]).observe(sdpObserver)
 }
 
 function exitRoom() {
+  dao.observable(['room', 'amICalling', roomName]).unobserve(amICallingObserver)
+  dao.observable(['room', 'myIp', roomName]).unobserve(myIpObserver)
+  dao.observable(['room', 'otherUserIce', roomName]).unobserve(iceObserver)
+  dao.observable(['room', 'otherUserSdp', roomName]).unobserve(sdpObserver)
   view.showLoading("Exiting room "+roomName, "Please wait.")
   if(peerConnection) {
     peerConnection.close()
@@ -228,7 +251,7 @@ view.exitRoom2.addEventListener("click", (ev) => exitRoom())
 
 view.showLoading("Waiting for video input.", "Please connect camera.")
 
-let userMediaSettings = { audio: true, video: true }
+let userMediaSettings = { audio: true, video: false }
 
 let userMediaPromise
 if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) userMediaPromise = navigator.mediaDevices.getUserMedia(userMediaSettings)

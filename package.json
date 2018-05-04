@@ -15,7 +15,9 @@
     "express": "^4.16.2",
     "reactive-dao": "git+https://github.com/ReactiveObserver/reactive-dao.git",
     "reactive-dao-sockjs": "git+https://github.com/ReactiveObserver/reactive-dao-sockjs.git",
+    "reactive-dao-websocket": "git+https://github.com/ReactiveObserver/reactive-dao-websocket.git",
     "sockjs": "^0.3.19",
-    "webpack": "^3.10.0"
+    "webpack": "^3.10.0",
+    "websocket": "^1.0.26"
   }
 }

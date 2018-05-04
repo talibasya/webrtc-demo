@@ -2,6 +2,8 @@ const ReactiveDao = require('reactive-dao')
 const express = require('express');
 const http = require('http')
 const sockjs = require('sockjs')
+const rdws = require("reactive-dao-websocket")
+const WebSocketServer = require('websocket').server
 
 let rooms = new Map()
 
@@ -79,7 +81,7 @@ class Room {
   }
   deleteUser(sessionId) {
     if(this.user1 && this.user1.sessionId == sessionId) this.user1 = null
-    if(this.user1 && this.user2.sessionId == sessionId) this.user2 = null
+    if(this.user2 && this.user2.sessionId == sessionId) this.user2 = null
     if(this.user1) this.user1.reset()
     if(this.user2) this.user2.reset()
   }
@@ -151,16 +153,22 @@ const reactiveServer = new ReactiveServer(daoFactory)
 
 const port = process.env.HTTP_PORT || 8181
 
-const sockjs_server = sockjs.createServer({})
-sockjs_server.on('connection', function(conn) {
-  if(reactiveServer) reactiveServer.handleConnection(conn)
-})
-
 const app = express()
 app.use(express.static('../client'))
 
 const server = http.createServer(app)
+
+const sockjs_server = sockjs.createServer({})
+sockjs_server.on('connection', function(conn) {
+  if(reactiveServer) reactiveServer.handleConnection(conn)
+})
 sockjs_server.installHandlers(server, { prefix: '/sockjs' })
 server.listen(port)
+
+let wsServer = new WebSocketServer({httpServer: server, autoAcceptConnections: false})
+wsServer.on("request",(request) => {
+  let serverConnection = new rdws.server(request)
+  reactiveServer.handleConnection(serverConnection)
+})
 
 console.log(`server started at localhost:${port}`)
