@@ -238,6 +238,7 @@ function exitRoom() {
   }
   remoteIce = []
   remoteSdp = null
+  calling = undefined
   dao.request(["room", "exitRoom"], roomName).then(ok => {
     view.showRoomInput()
   })
