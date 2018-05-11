@@ -210,7 +210,7 @@ const myIpObserver = {
       myIp = ip
       resetWebRTC()
     } else if(peerConnection) { // Reaction to reconnect
-      dao.request(["room", "setSdp"], roomName, peerConnection.currentLocalDescription.toJSON())
+      if(peerConnection.currentLocalDescription) dao.request(["room", "setSdp"], roomName, peerConnection.currentLocalDescription.toJSON())
     }
   }
 }
