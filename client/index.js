@@ -218,6 +218,7 @@ const myIpObserver = {
 /// Enter room action
 function enterRoom(roomNamep) {
   roomName = roomNamep
+  resetWebRTC()
   view.showLoading("Connecting to room "+roomName, "Please wait.")
   dao.observable(['room', 'amICalling', roomName]).observe(amICallingObserver)
   dao.observable(['room', 'myIp', roomName]).observe(myIpObserver)
