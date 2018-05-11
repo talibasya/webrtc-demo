@@ -236,6 +236,8 @@ function exitRoom() {
     peerConnection.close()
     peerConnection = null
   }
+  remoteIce = []
+  remoteSdp = null
   dao.request(["room", "exitRoom"], roomName).then(ok => {
     view.showRoomInput()
   })
