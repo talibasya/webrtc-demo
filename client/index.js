@@ -175,6 +175,7 @@ const sdpObserver = {
   set(sdp) { // Reaction to sdp changes
     if(sdp) {
       view.showInRoom("Connecting to other user", "Please wait.")
+      if(!peerConnection) resetWebRTC()
       peerConnection.setRemoteDescription(new RTCSessionDescription(sdp))
       if(!calling) sendAnswer()
     }
@@ -183,9 +184,11 @@ const sdpObserver = {
 
 const iceObserver = {
   set(initialIce) { // Reaction to ice reset
+    if(!peerConnection) resetWebRTC()
     for (let ice of initialIce) if(ice) peerConnection.addIceCandidate(new RTCIceCandidate(ice))
   },
   push(candidate) {
+    if(!peerConnection) resetWebRTC()
     remoteIce.push(candidate)
     if (candidate) peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
   }
