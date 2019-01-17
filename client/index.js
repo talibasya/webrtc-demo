@@ -120,7 +120,7 @@ let view = {
   showVideo(url) {
     this.hideAll()
     this.videoContainer.style.display = ''
-    this.video.src = url
+    this.video.srcObject = url
     this.video.play()
     this.status.innerText = 'Connected.'
   }
@@ -158,7 +158,7 @@ function resetWebRTC() {
     dao.request(['room', 'addIce'], roomName, evt.candidate)
   }
   peerConnection.onaddstream = function (evt) {
-    view.showVideo(URL.createObjectURL(evt.stream))
+    view.showVideo(evt.stream)
   }
   peerConnection.addStream(localStream)
   for(let candidate of remoteIce) {

@@ -12,6 +12,7 @@
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
     "express": "^4.16.2",
     "reactive-dao": "git+https://github.com/ReactiveObserver/reactive-dao.git",
     "reactive-dao-sockjs": "git+https://github.com/ReactiveObserver/reactive-dao-sockjs.git",

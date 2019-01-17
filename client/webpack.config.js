@@ -9,6 +9,7 @@ module.exports = {
   devtool: 'sourcemap',
   context: __dirname,
   entry: "./index.js",
+  watch: true,
   resolve: {
     aliasFields: ["browser"]
   },
@@ -23,7 +24,7 @@ module.exports = {
           resolve('../node_modules/reactive-dao'), resolve('../node_modules/reactive-dao-sockjs')],
         loader: 'babel-loader',
         query: {
-          presets: ['es2015']
+          presets: ['es2015', 'stage-0']
         }
       }
     ]

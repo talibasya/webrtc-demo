@@ -2,3 +2,4 @@
 *.iml
 node_modules
 client/index.compiled.js
+client/index.compiled.js.map
