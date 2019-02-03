@@ -2,6 +2,7 @@
 import ReactiveDao from "reactive-dao"
 import ReactiveSockJS from "reactive-dao-sockjs"
 import rdws from "reactive-dao-websocket"
+import EvEmitter from 'ev-emitter'
 
 /// Globally Unique IDentifier generator - for client-side generated session numbers
 function guid() {
@@ -14,6 +15,42 @@ function guid() {
 /// random session id
 let sessionId = guid()
 
+const extensionEmitter = new EvEmitter();
+
+// NOTE: is extension exist
+function isExtensionInstalled() {
+  return !!document.body.getAttribute('data-expertyExtensionLabel')
+}
+
+document.addEventListener('FROM_EXTENSION', function (event) {
+  if (event.target !== document) return;
+
+  if (event.detail && event.detail.action) {
+    extensionEmitter.emitEvent(event.detail.action, [event.detail.params.error, event.detail.params.data])
+  }
+})
+
+function triggerDocumentEvent(action) {
+  return new Promise(function (resolve, reject) {
+    if (!isExtensionInstalled()) throw new Error('Exstension is not installed')
+    const data = {
+      action
+    }
+
+    const storeEvent = new CustomEvent('FROM_PAGE', {
+      detail: data
+    })
+
+    extensionEmitter.once(action, function (error, data) {
+      if (error) return reject(new Error(error.code))
+      resolve(data)
+    })
+
+    document.dispatchEvent(storeEvent)
+  })
+
+}
+
 /// Create data access object
 let dao = new ReactiveDao(sessionId, {
   /// data access object remote endpoint url
@@ -23,7 +60,7 @@ let dao = new ReactiveDao(sessionId, {
     'sockjs': ReactiveSockJS // SockJS transport
   },*/
 
-  remoteUrl: (document.location.protocol == "https:" ? "wss:" : "ws:")  + '//' + document.location.host + "/ws",
+  remoteUrl: (document.location.protocol == "https:" ? "wss:" : "ws:") + '//' + document.location.host + "/ws",
   protocols: {
     ws: rdws.client
   },
@@ -37,7 +74,11 @@ let dao = new ReactiveDao(sessionId, {
 
 
 const peerConnectionConfig = {
-  "iceServers": [{"url": "turn:turn.xaos.ninja:4433", username:"test", credential: "12345"}]
+  "iceServers": [{
+    "url": "turn:turn.xaos.ninja:4433",
+    username: "test",
+    credential: "12345"
+  }]
 }
 
 /// Some useful variables
@@ -83,7 +124,7 @@ let view = {
     // clear style.display so element will have it's css based display property
     this.loading.style.display = ''
     this.loadingText.innerText = text
-    if(status) { // If status parameter exists set status too
+    if (status) { // If status parameter exists set status too
       this.status.innerText = status
     }
   },
@@ -94,7 +135,7 @@ let view = {
     // clear style.display so element will have it's css based display property
     this.inRoom.style.display = ''
     this.inRoomText.innerText = text
-    if(status) { // If status parameter exists set status too
+    if (status) { // If status parameter exists set status too
       this.status.innerText = status
     }
   },
@@ -104,7 +145,7 @@ let view = {
     this.hideAll()
     this.error.style.display = ''
     this.errorText.innerText = text
-    if(status) { // If status parameter exists set status too
+    if (status) { // If status parameter exists set status too
       this.status.innerText = status
     }
   },
@@ -136,6 +177,7 @@ function sendAnswer() {
     error => view.showError(error, "WebRTC error occured")
   )
 }
+
 function sendOffer() {
   console.log("SEND ALL")
   peerConnection.createOffer(
@@ -150,10 +192,10 @@ function sendOffer() {
 function resetWebRTC() {
   console.log("RESET WEBRTC")
   peerConnection = null
-  if(!myIp) return // wait for ip
-  if(calling === undefined) return // wait for calling status
+  if (!myIp) return // wait for ip
+  if (calling === undefined) return // wait for calling status
   console.log("INIT WEBRTC")
-  peerConnection = new (RTCPeerConnection || webkitRTCPeerConnection || mozRTCPeerConnection)(peerConnectionConfig)
+  peerConnection = new(RTCPeerConnection || webkitRTCPeerConnection || mozRTCPeerConnection)(peerConnectionConfig)
   peerConnection.onicecandidate = function (evt) {
     dao.request(['room', 'addIce'], roomName, evt.candidate)
   }
@@ -161,10 +203,10 @@ function resetWebRTC() {
     view.showVideo(evt.stream)
   }
   peerConnection.addStream(localStream)
-  for(let candidate of remoteIce) {
-    if(candidate) peerConnection.addIceCandidate(candidate)
+  for (let candidate of remoteIce) {
+    if (candidate) peerConnection.addIceCandidate(candidate)
   }
-  if(remoteSdp) {
+  if (remoteSdp) {
     peerConnection.setRemoteDescription(remoteSdp)
     if (!calling) sendAnswer()
   }
@@ -173,22 +215,23 @@ function resetWebRTC() {
 
 const sdpObserver = {
   set(sdp) { // Reaction to sdp changes
-    if(sdp) {
+    if (sdp) {
       view.showInRoom("Connecting to other user", "Please wait.")
-      if(!peerConnection) resetWebRTC()
+      if (!peerConnection) resetWebRTC()
       peerConnection.setRemoteDescription(new RTCSessionDescription(sdp))
-      if(!calling) sendAnswer()
+      if (!calling) sendAnswer()
     }
   }
 }
 
 const iceObserver = {
   set(initialIce) { // Reaction to ice reset
-    if(!peerConnection) resetWebRTC()
-    for (let ice of initialIce) if(ice) peerConnection.addIceCandidate(new RTCIceCandidate(ice))
+    if (!peerConnection) resetWebRTC()
+    for (let ice of initialIce)
+      if (ice) peerConnection.addIceCandidate(new RTCIceCandidate(ice))
   },
   push(candidate) {
-    if(!peerConnection) resetWebRTC()
+    if (!peerConnection) resetWebRTC()
     remoteIce.push(candidate)
     if (candidate) peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
   }
@@ -197,10 +240,10 @@ const iceObserver = {
 const amICallingObserver = {
   set(callingp) {
     view.showInRoom("Waiting for other user", "Please wait.")
-    if(calling == undefined) {
+    if (calling == undefined) {
       calling = callingp
     } else {
-      if(calling != callingp) {
+      if (calling != callingp) {
         resetWebRTC()
       }
     }
@@ -209,11 +252,11 @@ const amICallingObserver = {
 
 const myIpObserver = {
   set(ip) { // Reaction to ip changes
-    if(myIp !== ip) {
+    if (myIp !== ip) {
       myIp = ip
       resetWebRTC()
-    } else if(peerConnection) { // Reaction to reconnect
-      if(peerConnection.currentLocalDescription) dao.request(["room", "setSdp"], roomName, peerConnection.currentLocalDescription.toJSON())
+    } else if (peerConnection) { // Reaction to reconnect
+      if (peerConnection.currentLocalDescription) dao.request(["room", "setSdp"], roomName, peerConnection.currentLocalDescription.toJSON())
     }
   }
 }
@@ -222,7 +265,7 @@ const myIpObserver = {
 function enterRoom(roomNamep) {
   roomName = roomNamep
   resetWebRTC()
-  view.showLoading("Connecting to room "+roomName, "Please wait.")
+  view.showLoading("Connecting to room " + roomName, "Please wait.")
   dao.observable(['room', 'amICalling', roomName]).observe(amICallingObserver)
   dao.observable(['room', 'myIp', roomName]).observe(myIpObserver)
   dao.observable(['room', 'otherUserIce', roomName]).observe(iceObserver)
@@ -234,8 +277,8 @@ function exitRoom() {
   dao.observable(['room', 'myIp', roomName]).unobserve(myIpObserver)
   dao.observable(['room', 'otherUserIce', roomName]).unobserve(iceObserver)
   dao.observable(['room', 'otherUserSdp', roomName]).unobserve(sdpObserver)
-  view.showLoading("Exiting room "+roomName, "Please wait.")
-  if(peerConnection) {
+  view.showLoading("Exiting room " + roomName, "Please wait.")
+  if (peerConnection) {
     peerConnection.close()
     peerConnection = null
   }
@@ -248,29 +291,46 @@ function exitRoom() {
 }
 
 // bind events
+// view.showLoading("Waiting for video input.", "Please connect camera.")
+view.showRoomInput()
+
 view.roomInputContainer.addEventListener("submit", (ev) => {
   ev.preventDefault();
-  enterRoom(view.roomName.value)
+  triggerDocumentEvent('REQUEST_SCREENSHARE_SOURCE_ID').then(function (dataSource) {
+
+    console.log(dataSource.mediaSourceId)
+
+    let userMediaSettings = {
+      video: {
+        mandatory: {
+          chromeMediaSource: 'desktop',
+          // maxWidth: screen.width > 1920 ? screen.width : 1920,
+          // maxHeight: screen.height > 1080 ? screen.height : 1080,
+          chromeMediaSourceId: dataSource.mediaSourceId
+        },
+        optional: [{
+          googTemporalLayeredScreencast: true
+        }]
+      }
+    }
+
+    let userMediaPromise = new Promise(function (resolve, reject) {
+        navigator.getUserMedia(userMediaSettings, resolve, reject)
+      })
+      .then(function (stream) {
+        localStream = stream
+        view.showVideo(stream)
+        //view.showVideo(URL.createObjectURL(stream))
+        // view.showRoomInput()
+      })
+      .catch(function (err) {
+        console.log(err.message)
+        view.showError("Camera device not found.", "...")
+      })
+    // enterRoom(view.roomName.value)
+
+  }).catch(console.warn)
 })
 
 view.exitRoom.addEventListener("click", (ev) => exitRoom())
 view.exitRoom2.addEventListener("click", (ev) => exitRoom())
-
-view.showLoading("Waiting for video input.", "Please connect camera.")
-
-let userMediaSettings = { audio: true, video: false }
-
-let userMediaPromise
-if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) userMediaPromise = navigator.mediaDevices.getUserMedia(userMediaSettings)
-else if(navigator.getUserMedia) userMediaPromise = new Promise(function(resolve, reject) {
-  navigator.getUserMedia(userMediaSettings, resolve, reject)
-}); else throw new Error("getUserMedia not available")
-userMediaPromise
-  .then(function(stream) {
-    localStream = stream
-    //view.showVideo(URL.createObjectURL(stream))
-    view.showRoomInput()
-  })
-  .catch(function(err) {
-    view.showError("Camera device not found.", "...")
-  })
