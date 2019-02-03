@@ -151,7 +151,7 @@ const ReactiveServer = require("reactive-dao").ReactiveServer
 
 const reactiveServer = new ReactiveServer(daoFactory)
 
-const port = process.env.HTTP_PORT || 8181
+const port = process.env.HTTP_PORT || 3000
 
 const app = express()
 app.use(express.static('../client'))
