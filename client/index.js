@@ -32,7 +32,7 @@ document.addEventListener('FROM_EXTENSION', function (event) {
 
 function triggerDocumentEvent(action) {
   return new Promise(function (resolve, reject) {
-    if (!isExtensionInstalled()) throw new Error('Exstension is not installed')
+    if (!isExtensionInstalled()) throw new Error('EXTENSION_IS_NOT_INSTALLED')
     const data = {
       action
     }
