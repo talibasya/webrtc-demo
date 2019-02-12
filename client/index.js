@@ -22,6 +22,16 @@ function isExtensionInstalled() {
   return !!document.body.getAttribute('data-expertyExtensionLabel')
 }
 
+function isExtensionAlive(timeout = 500) {
+  return new Promise(function (resolve, reject) {
+    let timer = setTimeout(function() { reject(new Error('Extension is not activated')) }, timeout)
+    triggerDocumentEvent('PING').then(function (response) {
+      clearTimeout(timer)
+      resolve(response)
+    }).catch(reject)
+  })
+}
+
 document.addEventListener('FROM_EXTENSION', function (event) {
   if (event.target !== document) return;
 
@@ -307,16 +317,11 @@ view.roomInputContainer.addEventListener("submit", (ev) => {
           // maxWidth: screen.width > 1920 ? screen.width : 1920,
           // maxHeight: screen.height > 1080 ? screen.height : 1080,
           chromeMediaSourceId: dataSource.mediaSourceId
-        },
-        optional: [{
-          googTemporalLayeredScreencast: true
-        }]
+        }
       }
     }
 
-    let userMediaPromise = new Promise(function (resolve, reject) {
-        navigator.getUserMedia(userMediaSettings, resolve, reject)
-      })
+    let userMediaPromise = navigator.mediaDevices.getUserMedia(userMediaSettings)
       .then(function (stream) {
         localStream = stream
         view.showVideo(stream)
